@@ -12,7 +12,7 @@ using WARazorDB.Data;
 namespace WARazorDB.Migrations
 {
     [DbContext(typeof(TareaDbContext))]
-    [Migration("20250827124634_InitialCreate")]
+    [Migration("20250902005734_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

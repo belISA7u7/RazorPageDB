@@ -1,54 +1,93 @@
 ﻿@page
 @model WARazorDB.Pages.IndexModel
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Gestor de Tareas";
 }
 
-<h1>Index</h1>
+<div class="sidebar">
+    <h2>Gestión de Tareas</h2>
+    <ul class="sidebar-menu">
+        <li><a asp-page="/Index" class="active">Tareas</a></li>
+        <li><a asp-page="/Privacy">Privacidad</a></li>
+    </ul>
+    <div class="sidebar-category">GESTIÓN DE TAREAS</div>
+    <div class="sidebar-category">AJUSTES</div>
+</div>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Tarea[0].nombreTarea)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Tarea[0].fechaVencimiento)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Tarea[0].estado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Tarea[0].idUsuario)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Tarea) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.nombreTarea)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.fechaVencimiento)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.idUsuario)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="main">
+    <div class="header">
+        <div>
+            <h1>Mis Tareas</h1>
+            <div class="header-desc">Organiza tu día de forma adecuada</div>
+        </div>
+        <a asp-page="Create" class="btn-add">Nueva Tarea</a>
+    </div>
+
+    <!-- Filtros por estado como links -->
+    <div class="filter-group">
+        <a asp-page="/Index" asp-route-estadoFiltro="Todas" class="filter-btn @(Model.EstadoFiltro == "Todas" ? "active" : "")">Todas</a>
+        <a asp-page="/Index" asp-route-estadoFiltro="Pendiente" class="filter-btn @(Model.EstadoFiltro == "Pendiente" ? "active" : "")">Pendiente</a>
+        <a asp-page="/Index" asp-route-estadoFiltro="En Curso" class="filter-btn @(Model.EstadoFiltro == "En Curso" ? "active" : "")">En Curso</a>
+        <a asp-page="/Index" asp-route-estadoFiltro="Finalizado" class="filter-btn @(Model.EstadoFiltro == "Finalizado" ? "active" : "")">Finalizado</a>
+        <a asp-page="/Index" asp-route-estadoFiltro="Cancelado" class="filter-btn @(Model.EstadoFiltro == "Cancelado" ? "active" : "")">Cancelado</a>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Fecha de Vencimiento</th>
+                <th>Estado</th>
+                <th>Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Tarea)
+            {
+                <tr>
+                    <td>@item.nombreTarea</td>
+                    <td>@item.fechaVencimiento.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        @if (item.estado == "Pendiente")
+                        {
+                            <span class="badge bg-info">Pendiente</span>
+                        }
+                        else if (item.estado == "En Curso")
+                        {
+                            <span class="badge bg-warning">En Curso</span>
+                        }
+                        else if (item.estado == "Finalizado")
+                        {
+                            <span class="badge bg-success">Finalizado</span>
+                        }
+                        else if (item.estado == "Cancelado")
+                        {
+                            <span class="badge bg-danger">Cancelado</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@item.estado</span>
+                        }
+                    </td>
+                    <td>@item.idUsuario</td>
+                    <td>
+                        <a asp-page="./Edit" asp-route-id="@item.Id" class="btn-action" title="Editar">&#9998;</a>
+                        <a asp-page="./Details" asp-route-id="@item.Id" class="btn-action check" title="Detalles">&#8505;</a>
+                        <a asp-page="./Delete" asp-route-id="@item.Id" class="btn-action delete" title="Eliminar">&#128465;</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+   
+    <div class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <a asp-page="/Index"
+               asp-route-pageNumber="@i"
+               asp-route-estadoFiltro="@Model.EstadoFiltro"
+               class="page-link @(Model.PageNumber == i ? "active" : "")">@i</a>
+        }
+    </div>
+</div>

@@ -1,29 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using WARazorDB.Data;
 using WARazorDB.Models;
+using System.Linq;
 
 namespace WARazorDB.Pages
 {
     public class IndexModel : PageModel
     {
         private readonly WARazorDB.Data.TareaDbContext _context;
-
         public IndexModel(WARazorDB.Data.TareaDbContext context)
         {
             _context = context;
         }
 
-        public IList<Tarea> Tarea { get;set; } = default!;
+        public List<Tarea> Tarea { get; set; } = new();
+        public int TotalPages { get; set; }
+        public int PageNumber { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public string EstadoFiltro { get; set; } = "Todas";
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int pageNumber = 1, string estadoFiltro = "Todas")
         {
-            Tarea = await _context.Tareas.ToListAsync();
+            const int pageSize = 10;
+            var query = _context.Tareas.AsQueryable();
+
+            if (!string.IsNullOrEmpty(estadoFiltro) && estadoFiltro != "Todas")
+            {
+                
+                query = query.Where(t => t.estado.ToLower() == estadoFiltro.ToLower());
+            }
+
+            var totalItems = await Task.FromResult(query.Count());
+            TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            PageNumber = pageNumber;
+
+            Tarea = await Task.FromResult(
+                query
+                .OrderByDescending(t => t.fechaVencimiento)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList()
+            );
+            EstadoFiltro = estadoFiltro;
         }
     }
 }
